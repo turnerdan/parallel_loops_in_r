@@ -6,5 +6,3 @@ The coding challenges are in coding_challenges.Rmd
 Solutions to the coding challenges will be in coding_challenges_solutions.Rmd
 
 Check back after the workshop for updated files!
-Dan Turner
-3-12-22
