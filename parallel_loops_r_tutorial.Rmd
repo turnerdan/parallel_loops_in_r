@@ -368,12 +368,12 @@ head( grid_words )
 The easiest way to exhaustively compare two vectors is by using `expand.grid()` which finds all combinations. For example:
 
 ```{r}
-expand.grid( state.abb, state.abb )
+dim( expand.grid( state.abb, state.abb ) )
 ```
 
 But this will not work for grid_words, because it's too large
 
-```{r try_vectorization, echo=FALSE, message=FALSE, warning=FALSE}
+```{r try_vectorization, echo=TRUE, message=FALSE, warning=FALSE}
 
 toobig = try( expand_grid( grid_words, grid_words ),
           silent = TRUE )
