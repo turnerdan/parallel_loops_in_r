@@ -1,0 +1,135 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: Dan Turner (turnerdan dot com)
+version: 031222a
+---
+
+```{r shared_setup, message=FALSE, warning=FALSE, include=FALSE}
+
+#########################
+# Setup - do not change #
+#########################
+
+# Packages
+library( tictoc )     # for obtaining accurate code run time
+require( lme4 )       # we will bootstrap a few models
+library( beepr )      # sometimes I like an auditory notification when long processes finish
+library( tidyverse )  # for data processing and better syntax
+
+# For making foreach run correctly
+library( foreach )    # for parallel loop procedures across cores
+require( parallel )   # required by other packages we use
+library( doParallel ) # for setting up your machine for multi-core processing (also)
+
+# Import snapshots of the tutorial for each coding challenge
+# You can always start these challenges with a clean environment this way!
+a = read_rds("./data/snapshot_a.rds")
+b = read_rds("./data/snapshot_b.rds")
+c = read_rds("./data/snapshot_c.rds")
+
+```
+
+# Coding challenge A
+
+## Split Place_of_Work to get more reliable location info
+In the code chunk below, we use a vectorized function to extract the second element from Place_Of_Work_1. It should mostly consist of city,state data, but not always.
+
+```{r extract_citystate}
+
+# This splits Place_Of_Work_1 into a list whenever there's a dash.
+# We only take the second object in each list.
+place.of.work = str_split( a$Place_Of_Work_1, " - ", simplify = TRUE)[,2]
+
+head( place.of.work )
+```
+
+Now you should have a list the length of 'a' with city,state data.
+
+## Loop the new column to extract the state
+In this code chunk, your task is to parse the city,state string to get the state abbreviation.
+
+Tip: You may want to check each one against the preloaded object state.abb
+
+```{r coding_challenge_a, echo=FALSE, message=TRUE, warning=FALSE}
+
+# Loop place.of.work to extract 2-letter state codes...
+# ...which can be done using str_extract and a regular expression
+str_extract( "Forexample, IL","\\b[A-Z]{2}")
+
+# Start here
+# foreach( row = 1:nrow( a ),
+         
+```
+
+***
+
+# Coding challenge B
+The second challenge involves finding the mean `$Rating` of each city/state combination. Create an outer loop that lists the cities for which there are reviews, then create an inner loop that calculates the mean `$Rating` on each iteration. 
+
+*Outer Loop*
+`foreach(state) %:%`
+`city_list = unique cities in state`
+
+*Inner Loop*
+`foreach(city) %dorpar%`
+`calculate the mean review$Rating`
+
+```{r coding_challenge_b, echo=FALSE, message=TRUE, warning=FALSE}
+
+# First let's create an outer loop that goes through every state in the data
+
+# Inside of the state-by-state loop, we will extract the list of cities for the outer loop's state
+
+# Once we have the list of unique cities, create an inner loop that goes through every city in the data
+
+# When you have all the rows for each city, you can compute the mean $Rating in using vectorized code
+
+```
+
+# Coding challenge C
+For this challenge, you will for a Generalized Linear Model to sentiment data that I extracted ahead of time. The code chunk below shows the code I used to generate the data, in case you are curious!
+
+```{r sentiment_analysis, eval=FALSE, include=FALSE}
+
+# Installation (run once)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load_current_gh("trinker/lexicon", "trinker/sentimentr")
+
+# Load sentimentr
+library(sentimentr)
+
+{tic("Sentiment analysis")  # begin timer
+# Sentiment analysis (vectorized, but still slow)
+sentiments = sentiment( get_sentences( c$Review_Details ) )
+
+# Calculate the mean sentiment for each review (=row in original data)
+sentiments = sentiments %>% 
+  group_by( element_id ) %>% 
+  mutate( mean_sentiment = mean( sentiment )) %>% 
+  select( mean_sentiment ) %>% unique()
+
+# Add the sentiment score back into the data
+c$sentiment = sentiments$mean_sentiment
+
+# Save the sentiment results
+write_rds( c, "./data/snapshot_c.rds")
+```
+
+Now your task is to adapt the code from my bootstrapping example to run a model over the sentiment analysis results. Let the model specification be: sentiment ~ rating + length
+
+```{r coding_challenge_c, echo=FALSE, message=TRUE, warning=FALSE}
+
+# The foreach() call I used for bootstrap, to give you a head start...
+# bootstrap = foreach( icount( 1000 ),
+#                      .combine  = rbind,  
+#                      .packages = c ("dplyr", "lme4")) %dopar% {  
+#   }
+
+
+# Easy way to get the average of each column
+# colMeans( bootstrap )
+
+```
+
+end
